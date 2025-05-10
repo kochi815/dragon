@@ -24,19 +24,41 @@ const stageButtons = {
 };
 
 // --- ゲームの状態に関する変数 ---
-let currentStage = 2; // 現在挑戦中のステージ（段）最初は2の段
-let currentQuestion = {}; // 現在出題中の問題 { num1: ?, num2: ?, answer: ? }
+let currentStage = 2;
+let currentQuestion = {};
+
+// 【★追加★】ドラゴンの状態を管理するオブジェクト
+let dragon = {
+    name: "タマゴ",
+    level: 1,
+    exp: 0,
+    nextLevelExp: 10, // 次のレベルアップに必要な経験値
+    image: "images/egg.png",
+    // 将来の進化段階のための情報 (例: 進化レベル、進化後の名前や画像など)
+    // evolutionStage: 0, // 0: タマゴ, 1: ベビー, ...
+};
 
 // --- 関数 ---
 
 /**
+ * ドラゴンのステータス表示を更新する関数 【★追加★】
+ */
+function updateDragonStatusDisplay() {
+    dragonNameElement.textContent = dragon.name;
+    dragonLevelElement.textContent = dragon.level;
+    dragonExpElement.textContent = dragon.exp;
+    dragonNextExpElement.textContent = dragon.nextLevelExp;
+    dragonImageElement.src = dragon.image;
+    dragonImageElement.alt = dragon.name; // 画像の代替テキストも更新
+}
+
+/**
  * 指定された段の掛け算の問題をランダムに生成する関数
- * @param {number} stage - 掛け算の段 (例: 2の段なら2)
- * @returns {object} 問題オブジェクト { num1, num2, answer }
+ * (変更なし)
  */
 function generateQuestion(stage) {
     const num1 = stage;
-    const num2 = Math.floor(Math.random() * 9) + 1; // 1から9までのランダムな数
+    const num2 = Math.floor(Math.random() * 9) + 1;
     return {
         num1: num1,
         num2: num2,
@@ -46,26 +68,25 @@ function generateQuestion(stage) {
 
 /**
  * 問題を画面に表示する関数
+ * (変更なし)
  */
 function displayQuestion() {
     currentQuestion = generateQuestion(currentStage);
     questionTextElement.textContent = `${currentQuestion.num1} × ${currentQuestion.num2} = ?`;
-    resultTextElement.textContent = ''; // 結果表示をクリア
-    resultTextElement.className = ''; // 結果表示のスタイルクラスをクリア
+    resultTextElement.textContent = '';
+    resultTextElement.className = '';
     answerInputElement.value = '';
     answerInputElement.focus();
-    // 回答ボタンと入力欄を有効化
     submitAnswerButton.disabled = false;
     answerInputElement.disabled = false;
 }
 
 /**
- * 回答をチェックする関数
+ * 回答をチェックする関数 【★修正★】
  */
 function checkAnswer() {
     const userAnswerText = answerInputElement.value;
 
-    // 入力が空かどうかをチェック
     if (userAnswerText.trim() === '') {
         resultTextElement.textContent = "こたえをいれてね！";
         resultTextElement.className = 'incorrect';
@@ -75,25 +96,37 @@ function checkAnswer() {
 
     const userAnswer = parseInt(userAnswerText);
 
-    // 入力が数値でない場合は処理を中断
     if (isNaN(userAnswer)) {
         resultTextElement.textContent = "数字をいれてね！";
         resultTextElement.className = 'incorrect';
-        answerInputElement.value = ''; // 無効な入力をクリア
+        answerInputElement.value = '';
         answerInputElement.focus();
         return;
     }
 
-    // 正誤判定
     if (userAnswer === currentQuestion.answer) {
-        resultTextElement.textContent = "せいかい！すごい！";
+        resultTextElement.textContent = "せいかい！すごい！ +5けいけんち"; // 【★変更★】獲得経験値を表示
         resultTextElement.className = 'correct';
-        // 正解したら、少し待ってから次の問題へ
+
+        // 【★追加★】経験値を加算
+        dragon.exp += 5; // 1問正解で5経験値獲得 (この値は調整可能です)
+
+        // 【★追加★】レベルアップ判定 (詳細は次のステップで)
+        if (dragon.exp >= dragon.nextLevelExp) {
+            // 本来はここでレベルアップ処理を行う
+            console.log("レベルアップの条件を満たしました！"); // とりあえずコンソールに表示
+            // (次のステップで、実際にレベルアップさせ、表示を更新し、
+            //  次の必要経験値を設定するなどの処理をここに追加します)
+        }
+
+        // 【★追加★】ドラゴンのステータス表示を更新
+        updateDragonStatusDisplay();
+
         submitAnswerButton.disabled = true;
         answerInputElement.disabled = true;
         setTimeout(() => {
             displayQuestion();
-        }, 1500); // 1.5秒後に次の問題を表示
+        }, 1500);
     } else {
         resultTextElement.textContent = `おしい！こたえは ${currentQuestion.answer} でした。もういちどやってみよう！`;
         resultTextElement.className = 'incorrect';
@@ -103,44 +136,36 @@ function checkAnswer() {
 }
 
 // --- イベントリスナー ---
-// ステージ選択ボタンがクリックされたときの処理
+// (変更なし)
 for (const stageKey in stageButtons) {
+    // ... (前回のコードと同じ) ...
     const button = stageButtons[stageKey];
     if (button) { // ボタン要素が存在するか確認
         button.addEventListener('click', function() {
             if (this.disabled) {
                 return;
             }
-
-            // 他のボタンのアクティブ状態を解除
             for (const btnKey in stageButtons) {
                 if (stageButtons[btnKey]) {
                     stageButtons[btnKey].classList.remove('active');
                 }
             }
-            // クリックされたボタンをアクティブにする
             this.classList.add('active');
-
-            // ステージを更新して新しい問題を表示
             if (stageKey === 'all') {
-                // 「ぜんぶの段」はまだ実装していないので、一旦2の段にする (後で変更)
-                currentStage = 2; // この部分は後でランダムな段の出題ロジックに変更します
+                currentStage = 2;
                 alert("「ぜんぶの段」はまだ準備中です！");
             } else {
-                currentStage = parseInt(stageKey); // 文字列のキーを数値に変換
+                currentStage = parseInt(stageKey);
             }
             displayQuestion();
         });
     }
 }
 
-// 回答ボタンがクリックされたときの処理
 submitAnswerButton.addEventListener('click', checkAnswer);
 
-// Enterキーでも回答できるようにする
 answerInputElement.addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
-        // 回答ボタンが有効な場合のみEnterキーを機能させる
         if (!submitAnswerButton.disabled) {
             checkAnswer();
         }
@@ -148,18 +173,16 @@ answerInputElement.addEventListener('keypress', function(event) {
 });
 
 // --- 初期化処理 ---
-// ページが読み込まれたら、最初の問題を表示する
 window.addEventListener('load', () => {
-    // 初期状態では2の段ボタンをアクティブ表示
     if (stageButtons[2]) {
         stageButtons[2].classList.add('active');
-        // 他のボタンから念のため active クラスを削除（HTMLで直接指定している場合も考慮）
         for (const stageKey in stageButtons) {
             if (stageKey !== "2" && stageButtons[stageKey]) {
                 stageButtons[stageKey].classList.remove('active');
             }
         }
     }
-    currentStage = 2; // 明示的に初期ステージを2の段に設定
+    currentStage = 2;
+    updateDragonStatusDisplay(); // 【★追加★】初期のドラゴンステータスを表示
     displayQuestion();
 });
