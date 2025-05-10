@@ -1,0 +1,156 @@
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f8ff; /* やさしい水色 */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 800px;
+}
+
+header h1 {
+    color: #4a4a4a;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap; /* 画面が狭い時に折り返す */
+    gap: 20px;
+}
+
+#dragon-area, #game-area {
+    flex: 1; /* スペースを均等に分ける */
+    min-width: 300px; /* 最小幅を指定 */
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff8e1; /* やさしい黄色 */
+}
+
+#dragon-area h2, #game-area h2 {
+    color: #5a5a5a;
+    border-bottom: 2px solid #ffa726; /* オレンジ色の下線 */
+    padding-bottom: 5px;
+    margin-top: 0;
+}
+
+#dragon-image {
+    display: block;
+    max-width: 150px; /* ドラゴン画像の最大幅 */
+    height: auto;
+    margin: 10px auto; /* 中央揃え */
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    background-color: #eee; /* 画像がない場合の背景 */
+}
+
+#dragon-stats p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+#dragon-stats span {
+    font-weight: bold;
+    color: #d84315; /* オレンジ系の色 */
+}
+
+#stage-selection {
+    margin-bottom: 20px;
+}
+
+.stage-button {
+    padding: 8px 12px;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    background-color: #4caf50; /* 緑色 */
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.stage-button.active {
+    background-color: #81c784; /* 少し薄い緑 */
+}
+
+.stage-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#question-area {
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #2e7d32; /* 濃い緑 */
+    text-align: center;
+    min-height: 50px; /* 問題文エリアの最低限の高さ */
+    background-color: #e8f5e9; /* とても薄い緑 */
+    padding: 10px;
+    border-radius: 4px;
+}
+
+#answer-area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#answer-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+#submit-answer {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #1e88e5; /* 青色 */
+    color: white;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+#submit-answer:hover {
+    background-color: #1565c0; /* 少し濃い青 */
+}
+
+#result-text {
+    text-align: center;
+    font-weight: bold;
+    min-height: 20px; /* 結果表示エリアの最低限の高さ */
+}
+
+/* 正解・不正解のスタイル */
+#result-text.correct {
+    color: #4CAF50; /* 緑色 */
+}
+
+#result-text.incorrect {
+    color: #f44336; /* 赤色 */
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.8em;
+    color: #777;
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九九ドラゴン育成記</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>九九ドラゴン育成記</h1>
+        </header>
+
+        <main>
+            <section id="dragon-area">
+                <h2>ぼくのドラゴン</h2>
+                <img src="images/egg.png" alt="ドラゴンのタマゴ" id="dragon-image">
+                <div id="dragon-stats">
+                    <p>なまえ: <span id="dragon-name">タマゴ</span></p>
+                    <p>レベル: <span id="dragon-level">1</span></p>
+                    <p>けいけんち: <span id="dragon-exp">0</span> / <span id="dragon-next-exp">10</span></p>
+                </div>
+            </section>
+
+            <section id="game-area">
+                <h2>もんだい</h2>
+                <div id="stage-selection">
+                    <p>ちょうせんする段をえらんでね！</p>
+                    <button id="stage-2" class="stage-button active">2の段</button>
+                    <button id="stage-3" class="stage-button" disabled>3の段</button>
+                    <button id="stage-4" class="stage-button" disabled>4の段</button>
+                    <button id="stage-5" class="stage-button" disabled>5の段</button>
+                    <button id="stage-6" class="stage-button" disabled>6の段</button>
+                    <button id="stage-7" class="stage-button" disabled>7の段</button>
+                    <button id="stage-8" class="stage-button" disabled>8の段</button>
+                    <button id="stage-9" class="stage-button" disabled>9の段</button>
+                    <button id="stage-all" class="stage-button" disabled>ぜんぶの段</button>
+                </div>
+                <div id="question-area">
+                    <p id="question-text">ここに問題がでるよ</p>
+                </div>
+                <div id="answer-area">
+                    <input type="number" id="answer-input" placeholder="こたえを入力">
+                    <button id="submit-answer">こたえる！</button>
+                </div>
+                <p id="result-text"></p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 九九ドラゴン育成プロジェクト</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
