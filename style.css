@@ -154,3 +154,36 @@ footer {
     font-size: 0.8em;
     color: #777;
 }
+
+#result-text.levelup,
+#result-text.evolution {
+    font-size: 1.1em; /* 少し大きく */
+    padding: 8px;
+    border-radius: 4px;
+    animation: fadeInMessage 0.5s ease-out;
+}
+
+#result-text.levelup {
+    background-color: #e3f2fd; /* 薄い青 */
+    color: #1e88e5; /* 青 */
+    border: 1px solid #90caf9;
+}
+
+#result-text.evolution {
+    background-color: #fff3e0; /* 薄いオレンジ */
+    color: #ef6c00; /* オレンジ */
+    border: 1px solid #ffcc80;
+    font-weight: bold; /* 特に目立たせる */
+    animation: fadeInMessage 0.5s ease-out, pulseEffect 1.5s infinite 0.5s; /* 点滅アニメーションも追加 */
+}
+
+@keyframes fadeInMessage {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseEffect {
+    0% { box-shadow: 0 0 5px #ffcc80; }
+    50% { box-shadow: 0 0 15px #ef6c00, 0 0 20px #ef6c00; }
+    100% { box-shadow: 0 0 5px #ffcc80; }
+}

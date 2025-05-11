@@ -1,6 +1,7 @@
 // script.js
 
 // --- HTML要素の取得 ---
+// (前回と同じなので省略)
 const questionTextElement = document.getElementById('question-text');
 const answerInputElement = document.getElementById('answer-input');
 const submitAnswerButton = document.getElementById('submit-answer');
@@ -27,21 +28,32 @@ const stageButtons = {
 let currentStage = 2;
 let currentQuestion = {};
 
-// 【★追加★】ドラゴンの状態を管理するオブジェクト
+// 【★修正★】ドラゴンの状態を管理するオブジェクト
 let dragon = {
     name: "タマゴ",
     level: 1,
     exp: 0,
-    nextLevelExp: 10, // 次のレベルアップに必要な経験値
+    nextLevelExp: 10, // 次のレベルアップに必要な経験値 (初期値)
     image: "images/egg.png",
-    // 将来の進化段階のための情報 (例: 進化レベル、進化後の名前や画像など)
-    // evolutionStage: 0, // 0: タマゴ, 1: ベビー, ...
+    evolutionStage: 0 // 現在の進化段階
 };
+
+// 【★追加★】ドラゴンの進化情報を定義
+const evolutionData = [
+    { stage: 0, name: "タマゴ", image: "images/egg.png", requiredLevel: 1, nextLevelExpBase: 10 },
+    { stage: 1, name: "ベビー ドラゴン", image: "images/dragon_baby.png", requiredLevel: 2, nextLevelExpBase: 15 },
+    { stage: 2, name: "チャイルド ドラゴン", image: "images/dragon_child.png", requiredLevel: 5, nextLevelExpBase: 25 },
+    { stage: 3, name: "ヤング ドラゴン", image: "images/dragon_young.png", requiredLevel: 10, nextLevelExpBase: 40 },
+    { stage: 4, name: "アダルト ドラゴン", image: "images/dragon_adult.png", requiredLevel: 15, nextLevelExpBase: 60 },
+    { stage: 5, name: "エルダー ドラゴン", image: "images/dragon_elder.png", requiredLevel: 20, nextLevelExpBase: 100 } // 最終形態
+];
+
 
 // --- 関数 ---
 
 /**
- * ドラゴンのステータス表示を更新する関数 【★追加★】
+ * ドラゴンのステータス表示を更新する関数
+ * (変更なし)
  */
 function updateDragonStatusDisplay() {
     dragonNameElement.textContent = dragon.name;
@@ -49,8 +61,44 @@ function updateDragonStatusDisplay() {
     dragonExpElement.textContent = dragon.exp;
     dragonNextExpElement.textContent = dragon.nextLevelExp;
     dragonImageElement.src = dragon.image;
-    dragonImageElement.alt = dragon.name; // 画像の代替テキストも更新
+    dragonImageElement.alt = dragon.name;
 }
+
+/**
+ * レベルアップ処理を行う関数 【★追加★】
+ */
+function levelUpDragon() {
+    dragon.level++;
+    // 経験値は持ち越しにする (現在の経験値 - レベルアップ前の必要経験値)
+    // ただし、0未満にはならないようにする
+    dragon.exp = Math.max(0, dragon.exp - dragon.nextLevelExp);
+
+    // 新しい進化段階をチェック
+    let newEvolution = evolutionData.find(evo => evo.stage === dragon.evolutionStage + 1);
+    let didEvolve = false;
+
+    if (newEvolution && dragon.level >= newEvolution.requiredLevel) {
+        dragon.evolutionStage = newEvolution.stage;
+        dragon.name = newEvolution.name;
+        dragon.image = newEvolution.image;
+        resultTextElement.textContent = `おめでとう！ ${dragon.name} に進化した！ (レベル ${dragon.level})`;
+        resultTextElement.className = 'correct evolution'; // 進化用のスタイルクラス（後でCSSに追加）
+        didEvolve = true;
+    } else {
+        resultTextElement.textContent = `レベルアップ！ ${dragon.name} はレベル ${dragon.level} になった！`;
+        resultTextElement.className = 'correct levelup'; // レベルアップ用のスタイルクラス（後でCSSに追加）
+    }
+
+    // 次のレベルアップに必要な経験値を設定
+    // 現在の進化段階の基準値 * レベルの倍数のような形で少しずつ増やす (調整可能)
+    const currentEvoData = evolutionData[dragon.evolutionStage];
+    dragon.nextLevelExp = Math.floor(currentEvoData.nextLevelExpBase * (1 + (dragon.level - currentEvoData.requiredLevel) * 0.2));
+
+
+    updateDragonStatusDisplay();
+    return didEvolve; // 進化したかどうかを返す
+}
+
 
 /**
  * 指定された段の掛け算の問題をランダムに生成する関数
@@ -73,8 +121,8 @@ function generateQuestion(stage) {
 function displayQuestion() {
     currentQuestion = generateQuestion(currentStage);
     questionTextElement.textContent = `${currentQuestion.num1} × ${currentQuestion.num2} = ?`;
-    resultTextElement.textContent = '';
-    resultTextElement.className = '';
+    // resultTextElement.textContent = ''; // メッセージがすぐ消えないように、ここではクリアしない
+    // resultTextElement.className = '';
     answerInputElement.value = '';
     answerInputElement.focus();
     submitAnswerButton.disabled = false;
@@ -82,7 +130,7 @@ function displayQuestion() {
 }
 
 /**
- * 回答をチェックする関数 【★修正★】
+ * 回答をチェックする関数 【★大幅修正★】
  */
 function checkAnswer() {
     const userAnswerText = answerInputElement.value;
@@ -93,9 +141,7 @@ function checkAnswer() {
         answerInputElement.focus();
         return;
     }
-
     const userAnswer = parseInt(userAnswerText);
-
     if (isNaN(userAnswer)) {
         resultTextElement.textContent = "数字をいれてね！";
         resultTextElement.className = 'incorrect';
@@ -105,28 +151,41 @@ function checkAnswer() {
     }
 
     if (userAnswer === currentQuestion.answer) {
-        resultTextElement.textContent = "せいかい！すごい！ +5けいけんち"; // 【★変更★】獲得経験値を表示
+        const expGained = 5; // 1問正解で5経験値獲得
+        dragon.exp += expGained;
+        resultTextElement.textContent = `せいかい！ +${expGained}けいけんち`;
         resultTextElement.className = 'correct';
-
-        // 【★追加★】経験値を加算
-        dragon.exp += 5; // 1問正解で5経験値獲得 (この値は調整可能です)
-
-        // 【★追加★】レベルアップ判定 (詳細は次のステップで)
-        if (dragon.exp >= dragon.nextLevelExp) {
-            // 本来はここでレベルアップ処理を行う
-            console.log("レベルアップの条件を満たしました！"); // とりあえずコンソールに表示
-            // (次のステップで、実際にレベルアップさせ、表示を更新し、
-            //  次の必要経験値を設定するなどの処理をここに追加します)
-        }
-
-        // 【★追加★】ドラゴンのステータス表示を更新
-        updateDragonStatusDisplay();
+        updateDragonStatusDisplay(); // まず現在の経験値を表示
 
         submitAnswerButton.disabled = true;
         answerInputElement.disabled = true;
+
+        // レベルアップ判定 (複数回レベルアップする可能性も考慮)
+        // setTimeoutを使って、レベルアップ/進化のメッセージを見せる時間を確保する
         setTimeout(() => {
+            let evolvedThisTurn = false;
+            while (dragon.exp >= dragon.nextLevelExp && dragon.evolutionStage < evolutionData.length -1) { // 最終進化後はレベルアップのみ
+                if (levelUpDragon()) { // levelUpDragonが進化したらtrueを返す
+                    evolvedThisTurn = true;
+                }
+                // レベルアップ/進化メッセージを表示するために、一度updateDragonStatusDisplayを呼ぶ
+                updateDragonStatusDisplay();
+                 // もし進化したら、そのメッセージを優先して表示し、ループを一旦抜けるか、
+                 // もしくは連続レベルアップのメッセージは上書きされる形になる。
+                 // ここではlevelUpDragon内でメッセージ更新しているので、それを待つ。
+            }
+            // 最終進化後もレベルは上がり続けるが、nextLevelExpの計算は上記ループ外で行う必要がある場合がある。
+            // 現在はevolutionDataの最終要素のnextLevelExpBaseを使い続ける。
+
+            // レベルアップや進化がなかった場合でも、経験値は更新されているので表示を更新
+            // (levelUpDragonの中で既に呼ばれているので、基本的には不要だが念のため)
+            updateDragonStatusDisplay();
+
+            // 新しい問題を表示
             displayQuestion();
-        }, 1500);
+
+        }, evolvedThisTurn ? 2500 : 1000); // 進化したらメッセージを長めに表示
+
     } else {
         resultTextElement.textContent = `おしい！こたえは ${currentQuestion.answer} でした。もういちどやってみよう！`;
         resultTextElement.className = 'incorrect';
@@ -140,15 +199,11 @@ function checkAnswer() {
 for (const stageKey in stageButtons) {
     // ... (前回のコードと同じ) ...
     const button = stageButtons[stageKey];
-    if (button) { // ボタン要素が存在するか確認
+    if (button) {
         button.addEventListener('click', function() {
-            if (this.disabled) {
-                return;
-            }
+            if (this.disabled) { return; }
             for (const btnKey in stageButtons) {
-                if (stageButtons[btnKey]) {
-                    stageButtons[btnKey].classList.remove('active');
-                }
+                if (stageButtons[btnKey]) { stageButtons[btnKey].classList.remove('active'); }
             }
             this.classList.add('active');
             if (stageKey === 'all') {
@@ -157,23 +212,31 @@ for (const stageKey in stageButtons) {
             } else {
                 currentStage = parseInt(stageKey);
             }
+            // ステージ変更時はメッセージをクリア
+            resultTextElement.textContent = '';
+            resultTextElement.className = '';
             displayQuestion();
         });
     }
 }
-
 submitAnswerButton.addEventListener('click', checkAnswer);
-
 answerInputElement.addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
-        if (!submitAnswerButton.disabled) {
-            checkAnswer();
-        }
+        if (!submitAnswerButton.disabled) { checkAnswer(); }
     }
 });
 
 // --- 初期化処理 ---
 window.addEventListener('load', () => {
+    // 初期進化段階に基づいてドラゴン情報を設定
+    const initialEvo = evolutionData.find(evo => evo.stage === dragon.evolutionStage);
+    if (initialEvo) {
+        dragon.name = initialEvo.name;
+        dragon.image = initialEvo.image;
+        dragon.level = initialEvo.requiredLevel; // 初期レベルも進化段階に合わせる
+        dragon.nextLevelExp = initialEvo.nextLevelExpBase;
+    }
+
     if (stageButtons[2]) {
         stageButtons[2].classList.add('active');
         for (const stageKey in stageButtons) {
@@ -183,6 +246,6 @@ window.addEventListener('load', () => {
         }
     }
     currentStage = 2;
-    updateDragonStatusDisplay(); // 【★追加★】初期のドラゴンステータスを表示
+    updateDragonStatusDisplay();
     displayQuestion();
 });
