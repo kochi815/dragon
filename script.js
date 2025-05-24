@@ -8,7 +8,7 @@ const resultTextElement = document.getElementById('result-text-display'); // ID�
 const dragonImageElement = document.getElementById('dragon-image');
 const dragonNameElement = document.getElementById('dragon-name');
 const dragonLevelElement = document.getElementById('dragon-level');
-// 経験値バー関連の要素を取得 【★追加★】
+// 経験値バー関連の要素を取得
 const dragonExpTextElement = document.getElementById('dragon-exp-text');
 const dragonExpBarElement = document.getElementById('dragon-exp-bar');
 
@@ -25,7 +25,7 @@ const stageButtons = {
     all: document.getElementById('stage-all'),
 };
 
-// テンキーパッドのボタンを取得 【★追加★】
+// テンキーパッドのボタンを取得
 const numpadButtons = document.querySelectorAll('#numpad-area .numpad-button');
 
 // --- ゲームの状態に関する変数 ---
@@ -35,14 +35,15 @@ let dragon = {
     name: "タマゴ",
     level: 1,
     exp: 0,
-    nextLevelExp: 10,
+    nextLevelExp: 10, // 初期値 (evolutionDataに基づいて更新される)
     image: "images/egg.png",
     evolutionStage: 0
 };
 
+// 【★難易度調整★】 evolutionData の nextLevelExpBase を調整
 const evolutionData = [
-    { stage: 0, name: "タマゴ", image: "images/egg.png", requiredLevel: 1, nextLevelExpBase: 10 },
-    { stage: 1, name: "ベビー ドラゴン", image: "images/dragon_baby.png", requiredLevel: 2, nextLevelExpBase: 15 },
+    { stage: 0, name: "タマゴ", image: "images/egg.png", requiredLevel: 1, nextLevelExpBase: 8 }, // 例: 10から8に
+    { stage: 1, name: "ベビー ドラゴン", image: "images/dragon_baby.png", requiredLevel: 2, nextLevelExpBase: 12 }, // 例: 15から12に
     { stage: 2, name: "チャイルド ドラゴン", image: "images/dragon_child.png", requiredLevel: 5, nextLevelExpBase: 25 },
     { stage: 3, name: "ヤング ドラゴン", image: "images/dragon_young.png", requiredLevel: 10, nextLevelExpBase: 40 },
     { stage: 4, name: "アダルト ドラゴン", image: "images/dragon_adult.png", requiredLevel: 15, nextLevelExpBase: 60 },
@@ -52,23 +53,22 @@ const evolutionData = [
 // --- 関数 ---
 
 /**
- * ドラゴンのステータス表示を更新する関数 【★修正★】 (経験値バー対応)
+ * ドラゴンのステータス表示を更新する関数
  */
 function updateDragonStatusDisplay() {
     dragonNameElement.textContent = dragon.name;
     dragonLevelElement.textContent = dragon.level;
-    dragonExpTextElement.textContent = `${dragon.exp} / ${dragon.nextLevelExp}`; // テキスト表示
+    dragonExpTextElement.textContent = `${dragon.exp} / ${dragon.nextLevelExp}`;
     dragonImageElement.src = dragon.image;
     dragonImageElement.alt = dragon.name;
 
-    // 経験値バーの更新
     const expPercentage = (dragon.exp / dragon.nextLevelExp) * 100;
-    dragonExpBarElement.style.width = `${Math.min(expPercentage, 100)}%`; // 100%を超えないように
+    dragonExpBarElement.style.width = `${Math.min(expPercentage, 100)}%`;
 }
 
 function levelUpDragon() {
     dragon.level++;
-    dragon.exp = Math.max(0, dragon.exp - dragon.nextLevelExp); // 経験値持ち越し
+    dragon.exp = Math.max(0, dragon.exp - dragon.nextLevelExp); 
 
     let newEvolution = evolutionData.find(evo => evo.stage === dragon.evolutionStage + 1);
     let didEvolve = false;
@@ -78,15 +78,14 @@ function levelUpDragon() {
         dragon.name = newEvolution.name;
         dragon.image = newEvolution.image;
         resultTextElement.textContent = `おめでとう！ ${dragon.name} に進化した！ (レベル ${dragon.level})`;
-        resultTextElement.className = 'evolution'; // クラス名のみに
+        resultTextElement.className = 'evolution';
         didEvolve = true;
     } else {
         resultTextElement.textContent = `レベルアップ！ ${dragon.name} はレベル ${dragon.level} になった！`;
-        resultTextElement.className = 'levelup'; // クラス名のみに
+        resultTextElement.className = 'levelup';
     }
 
     const currentEvoData = evolutionData[dragon.evolutionStage];
-    // 最終進化後はnextLevelExpBaseを固定にするか、さらに上昇させるか選べる
     const baseExpForNextLevel = (currentEvoData.stage === evolutionData.length -1) ? currentEvoData.nextLevelExpBase * 1.2 : currentEvoData.nextLevelExpBase;
     dragon.nextLevelExp = Math.floor(baseExpForNextLevel * (1 + (dragon.level - currentEvoData.requiredLevel) * 0.25));
     
@@ -95,9 +94,8 @@ function levelUpDragon() {
 }
 
 function generateQuestion(stage) {
-    // 「ぜんぶの段」が選択された場合の処理を追加
-    if (stage === 'allActive') { // 'allActive' は仮の識別子
-        const randomDan = Math.floor(Math.random() * 8) + 2; // 2から9の段をランダムに選択
+    if (stage === 'allActive') { 
+        const randomDan = Math.floor(Math.random() * 8) + 2; 
         const num1 = randomDan;
         const num2 = Math.floor(Math.random() * 9) + 1;
         return { num1: num1, num2: num2, answer: num1 * num2 };
@@ -110,7 +108,6 @@ function generateQuestion(stage) {
 
 
 function displayQuestion() {
-    // currentStage が 'all' の場合、generateQuestion に特別な値を渡す
     if (currentStage === 'all') {
         currentQuestion = generateQuestion('allActive');
     } else {
@@ -118,11 +115,11 @@ function displayQuestion() {
     }
 
     questionTextElement.textContent = `${currentQuestion.num1} × ${currentQuestion.num2} = ?`;
-    answerInputElement.value = ''; // テンキー入力なので、表示はクリア
-    answerInputElement.focus(); // HTML側でreadonlyなのでフォーカス効果は薄いが念のため
+    answerInputElement.value = ''; 
+    // answerInputElement.focus(); // スマホ等でキーボードが一瞬出るのを避けるためコメントアウトも検討
     submitAnswerButton.disabled = false;
-    // resultTextElement.textContent = ''; // メッセージはすぐ消さない
-    // resultTextElement.className = '';
+    resultTextElement.textContent = ''; // 新しい問題表示時にメッセージをクリア
+    resultTextElement.className = '';   // メッセージスタイルもクリア
 }
 
 function checkAnswer() {
@@ -142,14 +139,14 @@ function checkAnswer() {
     }
 
     if (userAnswer === currentQuestion.answer) {
-        const expGained = 5;
+        const expGained = 10; // 【★難易度調整★】獲得経験値を5から10に増加
         dragon.exp += expGained;
         resultTextElement.textContent = `せいかい！ +${expGained}けいけんち`;
         resultTextElement.className = 'correct';
         updateDragonStatusDisplay();
 
         submitAnswerButton.disabled = true;
-        // テンキーも一時的に無効化するならここで制御
+        numpadButtons.forEach(btn => btn.disabled = true); // テンキーも無効化
 
         setTimeout(() => {
             let evolvedThisTurn = false;
@@ -157,22 +154,21 @@ function checkAnswer() {
                 if (levelUpDragon()) {
                     evolvedThisTurn = true;
                 }
-                updateDragonStatusDisplay();
+                // updateDragonStatusDisplay(); // levelUpDragon内で呼ばれる
             }
-            updateDragonStatusDisplay();
+            updateDragonStatusDisplay(); // 最終的な状態を表示
             displayQuestion();
-            // テンキー有効化もここで行う
-        }, evolvedThisTurn ? 2500 : 1000);
+            numpadButtons.forEach(btn => btn.disabled = false); // テンキーを再度有効化
+        }, evolvedThisTurn ? 2500 : 1000); // 進化時はメッセージを長めに
 
     } else {
         resultTextElement.textContent = `おしい！正解は ${currentQuestion.answer} でした。`;
         resultTextElement.className = 'incorrect';
-        answerInputElement.value = ''; // 間違えたら入力をクリア
+        answerInputElement.value = ''; 
     }
 }
 
 // --- イベントリスナー ---
-// ステージ選択ボタン
 for (const stageKey in stageButtons) {
     const button = stageButtons[stageKey];
     if (button) {
@@ -184,22 +180,19 @@ for (const stageKey in stageButtons) {
             this.classList.add('active');
 
             if (stageKey === 'all') {
-                currentStage = 'all'; // 'all' をcurrentStageに設定
-                // alert("「ぜんぶの段」に挑戦！"); // アラートは任意
+                currentStage = 'all';
             } else {
                 currentStage = parseInt(stageKey);
             }
-            resultTextElement.textContent = '';
-            resultTextElement.className = '';
+            // resultTextElement.textContent = ''; // displayQuestion内でクリアされる
+            // resultTextElement.className = '';
             displayQuestion();
         });
     }
 }
 
-// 回答ボタン
 submitAnswerButton.addEventListener('click', checkAnswer);
 
-// テンキーパッドの処理 【★追加★】
 numpadButtons.forEach(button => {
     button.addEventListener('click', () => {
         const value = button.textContent;
@@ -208,7 +201,6 @@ numpadButtons.forEach(button => {
         } else if (button.classList.contains('numpad-backspace')) {
             answerInputElement.value = answerInputElement.value.slice(0, -1);
         } else {
-            // 最大入力桁数を制限するならここで (例: 3桁まで)
             if (answerInputElement.value.length < 3) {
                 answerInputElement.value += value;
             }
@@ -216,7 +208,6 @@ numpadButtons.forEach(button => {
     });
 });
 
-// Enterキーでの回答は、テンキーがあるので優先度を下げるか、削除しても良い
 answerInputElement.addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
         if (!submitAnswerButton.disabled) { checkAnswer(); }
@@ -226,18 +217,19 @@ answerInputElement.addEventListener('keypress', function(event) {
 
 // --- 初期化処理 ---
 window.addEventListener('load', () => {
+    // 初期進化段階に基づいてドラゴン情報を設定
     const initialEvo = evolutionData.find(evo => evo.stage === dragon.evolutionStage);
     if (initialEvo) {
         dragon.name = initialEvo.name;
         dragon.image = initialEvo.image;
         dragon.level = initialEvo.requiredLevel;
-        dragon.nextLevelExp = initialEvo.nextLevelExpBase;
+        dragon.nextLevelExp = initialEvo.nextLevelExpBase; // ここで初期のnextLevelExpを設定
     }
 
-    if (stageButtons[2]) { // 初期は2の段を選択状態に
+    if (stageButtons[2]) { 
         stageButtons[2].classList.add('active');
         currentStage = 2;
-    } else { // もし2の段ボタンがなければ最初の有効なボタンを選択 (エラー対策)
+    } else { 
         const firstEnabledButtonKey = Object.keys(stageButtons).find(key => stageButtons[key] && !stageButtons[key].disabled);
         if (firstEnabledButtonKey) {
             stageButtons[firstEnabledButtonKey].classList.add('active');
