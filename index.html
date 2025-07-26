@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おべんきょうゲーム（1・2年生版）</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <div id="player-status">コイン: <span id="coin-total">0</span> 🪙</div>
+        
+        <div id="home-screen" class="screen active">
+            <h1>おべんきょうゲーム</h1>
+            <div class="header-nav">
+                <button class="nav-btn" data-target="garden-screen">おにわへ</button>
+                <button class="nav-btn" data-target="encyclopedia-screen">ねこずかん</button>
+                <button class="nav-btn" data-target="shop-screen">ショップ</button>
+            </div>
+            <div class="section">
+                <h2>どの もんだいにチャレンジする？</h2>
+                <div id="field-buttons">
+                    <button class="field-btn selected" data-field="all">✏️ ぜんぶ</button>
+                    <button class="field-btn" data-field="biology">🔢 さんすう</button>
+                    <button class="field-btn" data-field="physics">🌳 せいかつ</button>
+                </div>
+                </div>
+
+            <div class="accordion">
+                <button class="accordion-button">🏅 ごほうびのルール 🏅</button>
+                <div class="accordion-content">
+                    <table>
+                        <tr><th>10問正解</th><td><span class="coin-reward">10</span> コイン</td></tr>
+                        <tr><th>9問正解</th><td><span class="coin-reward">5</span> コイン</td></tr>
+                        <tr><th>7〜8問正解</th><td><span class="coin-reward">2</span> コイン</td></tr>
+                        <tr><th>5〜6問正解</th><td><span class="coin-reward">1</span> コイン</td></tr>
+                    </table>
+                </div>
+            </div>
+            <button id="start-quiz-btn" class="start-btn">10もんチャレンジ！</button>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div id="quiz-header"><span id="quiz-progress">1 / 10</span></div>
+            <div id="question-area">
+                <div id="question">もんだいはここにひょうじされます</div>
+                <div id="answer-choices"></div>
+            </div>
+            <button id="quit-quiz-btn">ホームにもどる</button>
+        </div>
+        
+        <div id="shop-screen" class="screen">
+            <div class="header-nav"><button class="nav-btn" data-target="home-screen">ホームへ</button></div>
+            <h2>ショップ</h2>
+            <p>コインをつかってアイテムをかおう！</p>
+            <div id="shop-item-grid"></div>
+        </div>
+
+        <div id="garden-screen" class="screen">
+            <div class="header-nav">
+                <button class="nav-btn" data-target="home-screen">ホームへ</button>
+                <button class="nav-btn" data-target="encyclopedia-screen">ねこずかん</button>
+            </div>
+            <h2>おにわ</h2>
+            <div id="garden-area">
+                <div class="garden-slot" data-slot="0"><span class="slot-text">アイテムをおく</span></div>
+                <div class="garden-slot" data-slot="1"><span class="slot-text">アイテムをおく</span></div>
+            </div>
+            <h3>もちもの</h3>
+            <div id="inventory-area"></div>
+        </div>
+        
+        <div id="encyclopedia-screen" class="screen">
+            <div class="header-nav">
+                 <button class="nav-btn" data-target="home-screen">ホームへ</button>
+                 <button class="nav-btn" data-target="garden-screen">おにわへ</button>
+            </div>
+            <h2>ねこずかん</h2>
+            <div id="cat-grid"></div>
+        </div>
+
+        <div id="result-modal" class="modal-container">
+            <div class="modal-content">
+                <h2 id="result-title">クイズおわり！</h2>
+                <p id="result-message"></p>
+                <div id="result-item-area"></div>
+                <button id="close-result-btn">OK</button>
+            </div>
+        </div>
+
+        <div id="cat-detail-modal" class="modal-container">
+            <div class="modal-content">
+                <div id="cat-detail-img"></div>
+                <h2 id="cat-detail-name"></h2>
+                <p id="cat-detail-description"></p>
+                <div id="cat-detail-needs"></div>
+                <button id="close-cat-detail-btn">とじる</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="problems.js"></script>
+    <script src="cat_data.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
